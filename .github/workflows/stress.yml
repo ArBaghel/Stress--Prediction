@@ -1,0 +1,50 @@
+name: ECG Stress Detector CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Python 3.10
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.10"
+
+    - name: Cache pip dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('requirements_fixed.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        # Install requirements except directml-plugin since we are testing on Linux CPU
+        grep -v "tensorflow-directml-plugin" requirements_fixed.txt > requirements_ci.txt
+        pip install -r requirements_ci.txt
+
+    - name: Lint check with Syntax / Compilation check
+      run: |
+        # syntax check python files
+        python -m py_compile apptest1.py
+
+    - name: Run Tests
+      run: |
+        # If there's a test suite, run unittest
+        if [ -f test_app.py ]; then
+          python -m unittest test_app.py
+        else
+          echo "No test_app.py found, running apptest1.py dry-run/import check"
+          python -c "import apptest1; print('Import test passed successfully!')"
+        fi

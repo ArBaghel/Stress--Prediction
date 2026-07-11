@@ -1,0 +1,53 @@
+{
+    "fs": 700,
+    "fs_mitbih": 360,
+    "window_size": 250,
+    "bandpass": {
+        "lowcut": 0.5,
+        "highcut": 40.0,
+        "order": 4
+    },
+    "rpeak_method": "Pan-Tompkins (robust: p99.5 clip before threshold)",
+    "labels": {
+        "0": "No-Stress",
+        "1": "Stress"
+    },
+    "threshold": 0.9757581949234009,
+    "threshold_method": "Youden's J on val subjects S13+S14",
+    "model_input": [
+        250,
+        1
+    ],
+    "model_name": "CNN-BiLSTM-DACAM+",
+    "architecture": "3xCNN + 2xBiLSTM + DACAM (ratio=4)",
+    "novelty": "Spatial attention conditioned on channel-attended BiLSTM + cross-axis refinement",
+    "pretraining": "MIT-BIH Arrhythmia Database (15 records, 3-block CNN, class-weighted)",
+    "split_method": "Subject-wise \u2014 no subject appears in more than one split",
+    "train_subjects": [
+        "S2",
+        "S3",
+        "S4",
+        "S5",
+        "S6",
+        "S7",
+        "S8",
+        "S9",
+        "S10",
+        "S11"
+    ],
+    "val_subjects": [
+        "S13",
+        "S14"
+    ],
+    "test_subjects": [
+        "S15",
+        "S16",
+        "S17"
+    ],
+    "augmentation": "ECG-specific: amplitude scale + time shift + Gaussian noise (replaces SMOTE)",
+    "best_val_acc": 72.48,
+    "best_val_auc": 0.8861,
+    "best_epoch": 7,
+    "test_accuracy": 78.9751,
+    "test_auc": 0.8878
+}

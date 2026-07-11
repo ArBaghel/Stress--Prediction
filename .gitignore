@@ -1,0 +1,27 @@
+# Virtual environment
+t_version/
+t_version
+
+# Python Cache & compiled files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.ipynb_checkpoints/
+
+# Virtual Environments
+.venv/
+venv/
+env/
+ENV/
+
+# IDEs and editors
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Datasets / CSV Files (if you want to ignore them, but let's keep them commented or active if needed. The main issue was t_version)
+data/WESAD/
