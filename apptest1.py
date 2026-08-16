@@ -31,6 +31,7 @@ MODEL_PATH  = os.path.join(os.path.dirname(__file__),
 
 from tensorflow.keras.layers import LSTM as KerasLSTM, Bidirectional
 
+@tf.keras.utils.register_keras_serializable(name='PatchedLSTM')
 class PatchedLSTM(KerasLSTM):
     def __init__(self, *args, **kwargs):
         kwargs.pop('time_major', None)
