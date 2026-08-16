@@ -1,5 +1,7 @@
 # 🫀 ECG Stress Predictor — CNN-BiLSTM-DACAM+
 
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://stress--prediction-model.streamlit.app/)
+
 An advanced, end-to-end, deep learning pipeline for real-time stress detection using raw Electrocardiogram (ECG) signals. Leveraging a hybrid neural network architecture comprising **1D Convolutional Neural Networks (CNN)**, **Bidirectional Long Short-Term Memory (BiLSTM)** networks, and the state-of-the-art **Dual-Axis Cross Attention Module (DACAM+)**, this system predicts stress states from human ECG sequences.
 
 The model is pre-trained on the **MIT-BIH Arrhythmia Database** for robust ECG feature extraction, fine-tuned on the physiological **WESAD (Wearable Stress and Affect Detection)** dataset, and optimized to run with high efficiency on modern Intel CPUs using **oneDNN** hardware acceleration. A real-time, interactive **Streamlit dashboard** enables users to upload or simulate ECG signals, run predictions, and visualize attention explainability heatmaps.
