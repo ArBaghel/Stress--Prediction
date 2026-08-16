@@ -25,7 +25,7 @@ st.set_page_config(
 FS          = 700
 WINDOW_SIZE = 250
 STEP_SIZE   = 125
-THRESHOLD   = 65.15   # optimal threshold from validation set (Youden's J)
+THRESHOLD   = 50.0    # default classification threshold
 MODEL_PATH  = os.path.join(os.path.dirname(__file__),
                            'models', 'best_model_CPU.h5')
 
@@ -328,22 +328,17 @@ with left:
             ["Normal ECG (~65 BPM)", "Stressed ECG (~95 BPM)"])
         duration = st.slider("Duration (seconds)", 10, 60, 30, 5)
 
-        if st.button("Generate Demo"):
-            np.random.seed(42)
-            n   = duration * FS
-            t   = np.linspace(0, duration, n)
-            hr  = 65 if "Normal" in sig_type else 95
-            nz  = 0.04 if "Normal" in sig_type else 0.12
-            sig = np.zeros(n)
-            for bt in np.arange(0, t[-1], 60.0/hr):
-                sig += np.exp(-0.5 * ((t - bt) / 0.02) ** 2)
-            sig += 0.1 * np.sin(2 * np.pi * 0.15 * t)
-            sig += nz * np.random.randn(n)
-            st.session_state['demo_ecg'] = sig.astype(np.float32)
-            st.success(f"Generated — HR: {hr} BPM, {duration}s")
-
-        if 'demo_ecg' in st.session_state:
-            ecg = st.session_state['demo_ecg']
+        np.random.seed(42)
+        n   = duration * FS
+        t   = np.linspace(0, duration, n)
+        hr  = 65 if "Normal" in sig_type else 95
+        nz  = 0.04 if "Normal" in sig_type else 0.12
+        sig = np.zeros(n)
+        for bt in np.arange(0, t[-1], 60.0/hr):
+            sig += np.exp(-0.5 * ((t - bt) / 0.02) ** 2)
+        sig += 0.1 * np.sin(2 * np.pi * 0.15 * t)
+        sig += nz * np.random.randn(n)
+        ecg = sig.astype(np.float32)
 
     if ecg is not None:
         st.markdown("<div class='section-title'>Preview (5s)</div>",
