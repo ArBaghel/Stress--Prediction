@@ -43,6 +43,7 @@ def load_model():
         'tf': tf,
         'K': K,
         'LSTM': PatchedLSTM,
+        'PatchedLSTM': PatchedLSTM,
         'Bidirectional': Bidirectional
     }
     return tf.keras.models.load_model(MODEL_PATH,
