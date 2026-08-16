@@ -29,14 +29,20 @@ THRESHOLD   = 65.15   # optimal threshold from validation set (Youden's J)
 MODEL_PATH  = os.path.join(os.path.dirname(__file__),
                            'models', 'stress_ecg_model.h5')
 
+from tensorflow.keras.layers import LSTM as KerasLSTM, Bidirectional
+
+class PatchedLSTM(KerasLSTM):
+    def __init__(self, *args, **kwargs):
+        kwargs.pop('time_major', None)
+        super().__init__(*args, **kwargs)
+
 @st.cache_resource
 def load_model():
     from tensorflow.keras import backend as K
-    from tensorflow.keras.layers import LSTM, Bidirectional
     custom_objects = {
         'tf': tf,
         'K': K,
-        'LSTM': LSTM,
+        'LSTM': PatchedLSTM,
         'Bidirectional': Bidirectional
     }
     return tf.keras.models.load_model(MODEL_PATH,
