@@ -6,7 +6,7 @@
 # ── TensorFlow + Intel Arc GPU (DirectML) ─────────────────
 # tensorflow-directml-plugin ONLY works with the 2.10.x family.
 # DO NOT upgrade to 2.11+ or the plugin will fail.
-tensorflow-cpu==2.10.0
+tensorflow==2.10.0
 tensorflow-directml-plugin==0.4.0.dev230202
 
 # ── protobuf — CRITICAL: must be <3.20 for TF 2.10 ───────
