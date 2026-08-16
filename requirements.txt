@@ -22,7 +22,7 @@ ipykernel==6.25.0; sys_platform == 'win32'
 opencv-python==4.8.0.76; sys_platform == 'win32'
 
 # ── STREAMLIT CLOUD ENVIRONMENT (Linux with Auto-Resolving Modern Packages) ──
-tensorflow-cpu; sys_platform != 'win32'
+tensorflow; sys_platform != 'win32'
 protobuf; sys_platform != 'win32'
 numpy; sys_platform != 'win32'
 pandas; sys_platform != 'win32'
