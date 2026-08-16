@@ -47,8 +47,15 @@ def load_model():
         'PatchedLSTM': PatchedLSTM,
         'Bidirectional': Bidirectional
     }
-    return tf.keras.models.load_model(MODEL_PATH,
-                                      custom_objects=custom_objects)
+    try:
+        return tf.keras.models.load_model(MODEL_PATH,
+                                          custom_objects=custom_objects,
+                                          safe_mode=False)
+    except TypeError as e:
+        if 'safe_mode' in str(e):
+            return tf.keras.models.load_model(MODEL_PATH,
+                                              custom_objects=custom_objects)
+        raise e
 
 def bandpass_filter(ecg):
     nyq  = FS / 2
