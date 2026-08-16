@@ -29,33 +29,117 @@ THRESHOLD   = 65.15   # optimal threshold from validation set (Youden's J)
 MODEL_PATH  = os.path.join(os.path.dirname(__file__),
                            'models', 'stress_ecg_model.h5')
 
-from tensorflow.keras.layers import LSTM as KerasLSTM, Bidirectional
+from tensorflow.keras.layers import Input, Conv1D, BatchNormalization, MaxPooling1D, Dropout, Bidirectional, LSTM, Flatten, Dense, Activation, Multiply, Concatenate, Add, Lambda
+from tensorflow.keras.models import Model
+from tensorflow.keras.regularizers import l2
+import tensorflow.keras.backend as K
 
-@tf.keras.utils.register_keras_serializable(name='PatchedLSTM')
-class PatchedLSTM(KerasLSTM):
-    def __init__(self, *args, **kwargs):
-        kwargs.pop('time_major', None)
-        super().__init__(*args, **kwargs)
+def dacam_block(inputs, reduction_ratio=4, name_prefix='dacam'):
+    """
+    DACAM: Dual-Axis Cross Attention Module.
+    """
+    channels = inputs.shape[-1]
+    r        = max(1, channels // reduction_ratio)
+
+    # Step 1: Channel Attention Gate
+    avg_ch = Lambda(lambda t: K.mean(t, axis=1, keepdims=True),
+                    name=f'{name_prefix}_avg_ch')(inputs)
+    max_ch = Lambda(lambda t: K.max(t,  axis=1, keepdims=True),
+                    name=f'{name_prefix}_max_ch')(inputs)
+    d1 = Dense(r,        activation='relu',   use_bias=False,
+               name=f'{name_prefix}_ch_d1')
+    d2 = Dense(channels, activation='linear', use_bias=False,
+               name=f'{name_prefix}_ch_d2')
+    channel_scores = Activation(
+        'sigmoid', name=f'{name_prefix}_ch_sigmoid')(
+        d2(d1(avg_ch)) + d2(d1(max_ch)))
+    x_ch = Multiply(name=f'{name_prefix}_ch_multiply')(
+        [inputs, channel_scores])
+
+    # Step 2: Spatial Attention Gate (conditioned on x_ch)
+    avg_sp    = Lambda(lambda t: K.mean(t, axis=-1, keepdims=True),
+                       name=f'{name_prefix}_avg_sp')(x_ch)
+    max_sp    = Lambda(lambda t: K.max(t,  axis=-1, keepdims=True),
+                       name=f'{name_prefix}_max_sp')(x_ch)
+    concat_sp = Concatenate(axis=-1,
+                            name=f'{name_prefix}_concat_sp')([avg_sp, max_sp])
+    spatial_scores = Conv1D(
+        1, kernel_size=5, padding='same',
+        activation='sigmoid',
+        name=f'{name_prefix}_sp_conv')(concat_sp)
+    x_sp = Multiply(name=f'{name_prefix}_sp_multiply')(
+        [x_ch, spatial_scores])
+
+    # Step 3: Cross Refinement
+    spatial_pooled = Lambda(lambda t: K.mean(t, axis=1, keepdims=True),
+                            name=f'{name_prefix}_sp_pool')(spatial_scores)
+    cr_gate = Dense(channels, activation='sigmoid', use_bias=False,
+                    name=f'{name_prefix}_cr_gate')(spatial_pooled)
+    refined = Multiply(name=f'{name_prefix}_cr_multiply')([x_sp, cr_gate])
+
+    # Residual connection
+    output = Add(name=f'{name_prefix}_residual')([refined, inputs])
+    return output, spatial_scores, channel_scores
+
+def build_model(input_shape=(250, 1)):
+    """
+    CNN-BiLSTM-DACAM+ model architecture.
+    """
+    inputs = Input(shape=input_shape, name='ecg_input')
+
+    # ── CNN Block 1 ───────────────────────────────────────────
+    x = Conv1D(64, kernel_size=5, padding='same',
+               activation='relu', name='conv1')(inputs)
+    x = BatchNormalization(name='bn1')(x)
+
+    # ── CNN Block 2 ───────────────────────────────────────────
+    x = Conv1D(128, kernel_size=5, padding='same',
+               activation='relu', name='conv2')(x)
+    x = BatchNormalization(name='bn2')(x)
+    x = MaxPooling1D(pool_size=2, name='pool1')(x)
+    x = Dropout(0.25, name='drop1')(x)
+
+    # ── CNN Block 3 ───────────────────────────────────────────
+    x = Conv1D(256, kernel_size=3, padding='same',
+               activation='relu', name='conv3')(x)
+    x = BatchNormalization(name='bn3')(x)
+    x = MaxPooling1D(pool_size=2, name='pool2')(x)
+    x = Dropout(0.25, name='drop2')(x)
+
+    # ── BiLSTM Block 1 ──────────────────
+    x = Bidirectional(
+            LSTM(128, return_sequences=True,
+                 dropout=0.2, recurrent_dropout=0.1),
+            name='bilstm1')(x)
+
+    # ── BiLSTM Block 2 ───────────────────
+    x = Bidirectional(
+            LSTM(64, return_sequences=True,
+                 dropout=0.2, recurrent_dropout=0.1),
+            name='bilstm2')(x)
+
+    # ── DACAM+ ───────────────────
+    x, spatial_scores, channel_scores = dacam_block(
+        x, reduction_ratio=4, name_prefix='dacam')
+
+    # ── Dense Head ──────────────────────
+    x = Flatten(name='flatten')(x)
+    x = Dense(128, activation='relu',
+              kernel_regularizer=l2(0.0005), name='dense1')(x)
+    x = Dropout(0.4, name='drop3')(x)
+    x = Dense(64, activation='relu',
+              kernel_regularizer=l2(0.0005), name='dense2')(x)
+    x = Dropout(0.3, name='drop4')(x)
+    output = Dense(1, activation='sigmoid',
+                   dtype='float32', name='output')(x)
+
+    return Model(inputs=inputs, outputs=output, name='CNN_BiLSTM_DACaMplus')
 
 @st.cache_resource
 def load_model():
-    from tensorflow.keras import backend as K
-    custom_objects = {
-        'tf': tf,
-        'K': K,
-        'LSTM': PatchedLSTM,
-        'PatchedLSTM': PatchedLSTM,
-        'Bidirectional': Bidirectional
-    }
-    try:
-        return tf.keras.models.load_model(MODEL_PATH,
-                                          custom_objects=custom_objects,
-                                          safe_mode=False)
-    except TypeError as e:
-        if 'safe_mode' in str(e):
-            return tf.keras.models.load_model(MODEL_PATH,
-                                              custom_objects=custom_objects)
-        raise e
+    model = build_model(input_shape=(250, 1))
+    model.load_weights(MODEL_PATH)
+    return model
 
 def bandpass_filter(ecg):
     nyq  = FS / 2
