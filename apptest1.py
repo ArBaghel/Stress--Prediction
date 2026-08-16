@@ -27,7 +27,7 @@ WINDOW_SIZE = 250
 STEP_SIZE   = 125
 THRESHOLD   = 65.15   # optimal threshold from validation set (Youden's J)
 MODEL_PATH  = os.path.join(os.path.dirname(__file__),
-                           'models', 'stress_ecg_model.h5')
+                           'models', 'best_model_CPU.h5')
 
 from tensorflow.keras.layers import Input, Conv1D, BatchNormalization, MaxPooling1D, Dropout, Bidirectional, LSTM, Flatten, Dense, Activation, Multiply, Concatenate, Add, Lambda
 from tensorflow.keras.models import Model
