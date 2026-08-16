@@ -32,7 +32,13 @@ MODEL_PATH  = os.path.join(os.path.dirname(__file__),
 @st.cache_resource
 def load_model():
     from tensorflow.keras import backend as K
-    custom_objects = {'tf': tf, 'K': K}
+    from tensorflow.keras.layers import LSTM, Bidirectional
+    custom_objects = {
+        'tf': tf,
+        'K': K,
+        'LSTM': LSTM,
+        'Bidirectional': Bidirectional
+    }
     return tf.keras.models.load_model(MODEL_PATH,
                                       custom_objects=custom_objects)
 
