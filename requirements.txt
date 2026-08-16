@@ -1,37 +1,39 @@
 # =========================================================
 # requirements.txt — Stress Detection ECG (CNN-BiLSTM-DACAM+)
+# Dual-Environment: Local Windows (Intel Arc GPU/TF 2.10) & Streamlit Cloud (Linux/Python 3.14+)
 # =========================================================
 
-# ── TensorFlow & GPU settings ─────────────────────────────
-# tensorflow-directml-plugin ONLY works with TensorFlow 2.10.x family.
-# On Windows (local environment with Intel Arc GPU):
+# ── LOCAL WINDOWS ENVIRONMENT (Intel Arc GPU + TensorFlow 2.10) ──
 tensorflow-directml-plugin==0.4.0.dev230202; sys_platform == 'win32'
-# On Streamlit Cloud (Linux) or other platforms:
-tensorflow-cpu==2.10.0
-
-# ── protobuf — CRITICAL: must be <3.20 for TF 2.10 ───────
-protobuf==3.19.6
-
-# ── Scientific stack ──────────────────────────────────────
-numpy==1.24.3
-pandas==2.0.3
-matplotlib==3.7.2
-seaborn==0.12.2
-scipy==1.11.1
-
-# ── ECG / biosignal ───────────────────────────────────────
-wfdb==4.1.2
-neurokit2==0.2.7
-
-# ── ML utilities ─────────────────────────────────────────
-scikit-learn==1.3.0
-imbalanced-learn==0.11.0
-
-# ── App / notebook ────────────────────────────────────────
-streamlit==1.22.0
-pillow==9.5.0
-ipykernel==6.25.0
-
-# Headless OpenCV for server environment (Streamlit Cloud)
+tensorflow-cpu==2.10.0; sys_platform == 'win32'
+protobuf==3.19.6; sys_platform == 'win32'
+numpy==1.24.3; sys_platform == 'win32'
+pandas==2.0.3; sys_platform == 'win32'
+matplotlib==3.7.2; sys_platform == 'win32'
+seaborn==0.12.2; sys_platform == 'win32'
+scipy==1.11.1; sys_platform == 'win32'
+wfdb==4.1.2; sys_platform == 'win32'
+neurokit2==0.2.7; sys_platform == 'win32'
+scikit-learn==1.3.0; sys_platform == 'win32'
+imbalanced-learn==0.11.0; sys_platform == 'win32'
+streamlit==1.22.0; sys_platform == 'win32'
+pillow==9.5.0; sys_platform == 'win32'
+ipykernel==6.25.0; sys_platform == 'win32'
 opencv-python==4.8.0.76; sys_platform == 'win32'
-opencv-python-headless==4.8.0.76; sys_platform != 'win32'
+
+# ── STREAMLIT CLOUD ENVIRONMENT (Linux with Auto-Resolving Modern Packages) ──
+tensorflow-cpu; sys_platform != 'win32'
+protobuf; sys_platform != 'win32'
+numpy; sys_platform != 'win32'
+pandas; sys_platform != 'win32'
+matplotlib; sys_platform != 'win32'
+seaborn; sys_platform != 'win32'
+scipy; sys_platform != 'win32'
+wfdb; sys_platform != 'win32'
+neurokit2; sys_platform != 'win32'
+scikit-learn; sys_platform != 'win32'
+imbalanced-learn; sys_platform != 'win32'
+streamlit; sys_platform != 'win32'
+pillow; sys_platform != 'win32'
+ipykernel; sys_platform != 'win32'
+opencv-python-headless; sys_platform != 'win32'
