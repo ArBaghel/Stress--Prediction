@@ -25,3 +25,4 @@ Thumbs.db
 
 # Datasets / CSV Files (if you want to ignore them, but let's keep them commented or active if needed. The main issue was t_version)
 data/WESAD/
+requirements_fixed.txt/
