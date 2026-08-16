@@ -223,7 +223,7 @@ Open the provided URL in your web browser (typically `http://localhost:8501`).
 ├── t_version/            # Python Virtual Environment
 ├── apptest1.py           # Main Streamlit web application
 ├── test_app.py           # PyTest/Unittest suite
-├── requirements_fixed.txt # Fixed requirements list
+├── requirements.txt # Fixed requirements list
 └── README.md             # Project documentation (this file)
 ```
 
