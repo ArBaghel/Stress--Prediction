@@ -27,7 +27,7 @@ WINDOW_SIZE = 250
 STEP_SIZE   = 125
 THRESHOLD   = 65.15   # optimal threshold from validation set (Youden's J)
 MODEL_PATH  = os.path.join(os.path.dirname(__file__),
-                           'models', 'stress_ecg_model.keras')
+                           'models', 'stress_ecg_model.h5')
 
 @st.cache_resource
 def load_model():
